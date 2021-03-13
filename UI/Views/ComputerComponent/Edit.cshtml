@@ -1,0 +1,102 @@
+﻿@model UI.Models.ComponentViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Edit</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <div class="container pt-4">
+            <div class="row">
+                <h2>Edit</h2>
+
+                <div>
+                    @using (Html.BeginForm("Edit", "ComputerComponent", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Type, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="ml-5 d-inline-block">
+                                @Html.DropDownList("Type", new SelectList(ViewBag.TypesName))
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Producer, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="ml-5 d-inline-block">
+                                @Html.DropDownList("Producer", new SelectList(ViewBag.ProducersName))
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="form-group">
+                                <div class="col-md-10">
+                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                        <input class="form-check-input d-inlineblock" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option" onchange="DisplayImageText(this)">
+                                        <label class="form-check-label" for="inlineRadio1">URL</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-10">
+                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                        <input class="form-check-input d-inlineblock" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option1" onchange="DisplayImageURL(this)">
+                                        <label class="form-check-label" for="inlineRadio2">LocalPC</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-10 d-none" id="game-img-url">
+                                <label for="uploadFile">Choose file to upload</label>
+                                <input id="image_attach" type="file" name="uploadFile">
+                            </div>
+                        </div>
+                        <div class="form-group d-none" id="game-img-text">
+                            @Html.LabelFor(model => model.Image, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Image, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Edit" class="btn btn-default" style="border: 1px solid black;" />
+                            </div>
+                        </div>
+                    }
+                    <div>
+                        @Html.ActionLink("Back to List", "Index")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

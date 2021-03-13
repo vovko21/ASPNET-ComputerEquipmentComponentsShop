@@ -1,0 +1,14 @@
+﻿body {
+}
+
+.d-inlineblock {
+    display: inline-block !important;
+}
+
+.f-25 {
+    font-size: 25px;
+}
+
+.max-image-400 {
+    max-width: 400px;
+}
