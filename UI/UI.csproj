@@ -272,6 +272,7 @@
     <Content Include="Views\ComputerComponent\Delete.cshtml" />
     <Content Include="Views\ComputerComponent\Show.cshtml" />
     <Content Include="Views\ComputerComponent\Cart.cshtml" />
+    <Content Include="Views\ComputerComponent\ComponentsPartial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

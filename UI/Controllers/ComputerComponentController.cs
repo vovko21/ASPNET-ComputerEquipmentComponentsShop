@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BLL.Models;
 using BLL.Services.Interface;
+using BLL.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ namespace UI.Controllers
         {
             storeService = _componentService;
             mapper = _mapper;
+            SetViewBag();
         }
 
         [HttpGet]
@@ -33,6 +35,7 @@ namespace UI.Controllers
                 return View(components.ToList());
             }
 
+            SetViewBag();
             return View(components.Where(x => x.Name.Contains(search)).ToList());
         }
 
@@ -147,6 +150,54 @@ namespace UI.Controllers
                 return View(CartItems.Items);
             }
             return RedirectToAction("Index");
+        }
+
+        public ActionResult Filter(string type, string value)
+        {
+            var filter = new ComponentFilter()
+            {
+                Name = value,
+                Type = type
+            };
+
+            if (type == "type")
+            {
+                filter.Predicate = (x => x.Type == value);
+            }
+            else if (type == "producer")
+            {
+                filter.Predicate = (x => x.Producer == value);
+            }
+
+            var filters = new List<ComponentFilter>();
+            if (Session["ComponentFilter"] != null)
+            {
+                filters = Session["ComponentFilter"] as List<ComponentFilter>;
+            }
+
+            var found = filters.FirstOrDefault(f => f.Name == value && f.Type == type);
+            if (found != null)
+            {
+                filters.Remove(found);
+            }
+            else
+            {
+                filters.Add(filter);
+            }
+
+            if (filters.Count == 0) return HttpNotFound();
+            Session["ComponentFilter"] = filters;
+
+            var components = storeService.GetAllComponents(filters);
+            SetViewBag();
+
+            return PartialView("ComponentsPartial", mapper.Map<List<ComponentViewModel>>(components));
+        }
+
+        private void SetViewBag()
+        {
+            ViewBag.Types = storeService.GetAllProducerNames();
+            ViewBag.Producers = storeService.GetAllTypeNames();
         }
     }
 }

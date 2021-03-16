@@ -8,6 +8,7 @@ using Type = DAL.Entity.Type;
 using Producer = DAL.Entity.Producer;
 using Component = DAL.Entity.Component;
 using BLL.Models;
+using BLL.Utils;
 
 namespace BLL.Services.Interface
 {
@@ -18,6 +19,7 @@ namespace BLL.Services.Interface
         Task UpdateComponentAsync(ComponentDTO component);
         Task DeleteComponentAsync(int id);
         IEnumerable<ComponentDTO> GetAllComponents();
+        IEnumerable<ComponentDTO> GetAllComponents(List<ComponentFilter> filters);
         IEnumerable<Type> GetAllTypes();
         IEnumerable<Producer> GetAllProducers();
         public IEnumerable<string> GetAllTypeNames();

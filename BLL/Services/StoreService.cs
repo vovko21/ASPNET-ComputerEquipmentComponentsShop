@@ -1,9 +1,13 @@
 ﻿using AutoMapper;
+using Binbin.Linq;
 using BLL.Models;
 using BLL.Services.Interface;
+using BLL.Utils;
 using DAL.Repository.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Component = DAL.Entity.Component;
 using Producer = DAL.Entity.Producer;
@@ -42,6 +46,33 @@ namespace BLL.Services
         public IEnumerable<ComponentDTO> GetAllComponents()
         {
             return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll());
+        }
+
+        public IEnumerable<ComponentDTO> GetAllComponents(List<ComponentFilter> filters)
+        {
+            var predicates = new List<Expression<Func<ComponentDTO, bool>>>();
+
+            var groups = filters.GroupBy(x => x.Type);
+
+            foreach (var g in groups)
+            {
+                var builder = PredicateBuilder.Create(g.FirstOrDefault().Predicate);
+                for (int i = 0; i < g.Count(); i++)
+                {
+                    builder = builder.Or(g.ToArray()[i].Predicate);
+                }
+                predicates.Add(builder);
+            }
+            var builder1 = PredicateBuilder.Create(filters.FirstOrDefault().Predicate);
+            if (predicates.Count > 1)
+            {
+                foreach (var p in predicates)
+                {
+                    builder1 = builder1.And(p);
+                }
+            }
+            return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(builder1.Compile());
+            //return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll().Where(mapper.Map<Func<Component, bool>>(builder1.Compile())));
         }
 
         public IEnumerable<Producer> GetAllProducers()

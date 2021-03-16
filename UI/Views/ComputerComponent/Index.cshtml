@@ -5,24 +5,6 @@
 
 <div class="dashboard-wrapper">
     <div class="container pt-4">
-        <div class="row">
-            @foreach (var item in Model)
-            {
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="card">
-                        <img class="card-img-top img-fluid p-2" src="@item.Image" alt="Card image cap">
-                        <div class="card-body">
-                            @Html.ActionLink($"{item.Name}", "Show", new { id = item.Id },htmlAttributes: new { @class= "card-title f-25" })
-                            <p class="card-text">@item.Description</p>
-                            @*<p class="card-text">Producer: <strong>@item.Producer</strong></p>
-                            <p class="card-text">Type: <strong>@item.Type</strong></p>*@
-                            <p class="card-text">Price: @item.Price $</p>
-                            @Html.ActionLink("Edit", "Edit", new { id = item.Id })
-                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
+        @{ Html.RenderPartial("ComponentsPartial", Model); }
     </div>
 </div>

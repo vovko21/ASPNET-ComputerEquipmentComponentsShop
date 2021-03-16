@@ -66,9 +66,9 @@ namespace DAL
                 }
             };
 
-            context.Components.AddRange(components);
             context.Types.AddRange(types);
             context.Producers.AddRange(producers);
+            context.Components.AddRange(components);
 
             context.SaveChanges();
 
