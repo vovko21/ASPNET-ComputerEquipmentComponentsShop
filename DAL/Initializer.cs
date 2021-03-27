@@ -5,8 +5,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Type = DAL.Entity.Type;
-using Component = DAL.Entity.Component;
 
 namespace DAL
 {
@@ -14,21 +12,22 @@ namespace DAL
     {
         protected override void Seed(ApplicationContext context)
         {
-            var types = new List<Type> {
-                new Type() { Name = "Videocard"},
-                new Type() { Name = "Processor"},
-                new Type() { Name = "Motherboard"}
+            var types = new List<Entity.Type> {
+                new Entity.Type() { Name = "Videocard"},
+                new Entity.Type() { Name = "Processor"},
+                new Entity.Type() { Name = "Motherboard"}
             };
 
-            var producers = new List<Producer>(){
+            var producers = new List<Producer> {
                 new Producer() {Name = "Nvidia"},
                 new Producer() {Name = "AMD"},
                 new Producer() {Name = "Intel"},
                 new Producer() {Name = "Gigabyte"},
             };
 
-            var components = new List<Component>(){
-                new Component()
+            var components = new List<Component>
+            {
+                new Component
                 {
                     Name = "RTX 2060",
                     Type = types.FirstOrDefault(x => x.Name == "Videocard"),
@@ -37,7 +36,7 @@ namespace DAL
                     Description = "Bruh",
                     Image = "https://www.ixbt.com/img/r30/00/02/16/18/front.jpg"
                 },
-                new Component()
+                new Component
                 {
                     Name = "B450M S2H",
                     Type = types.FirstOrDefault(x => x.Name == "Motherboard"),
@@ -46,7 +45,7 @@ namespace DAL
                     Description = "Lorem Ipsum",
                     Image = "https://www.powerplanetonline.com/cdnassets/gigabyte_b450m_s2h_rev_1_0_am4_01_l.jpg"
                 },
-                new Component()
+                new Component
                 {
                     Name = "Intel Core I5",
                     Type = types.FirstOrDefault(x => x.Name == "Processor"),
@@ -55,7 +54,7 @@ namespace DAL
                     Description = "Lorem Ipsum",
                     Image = "https://hotline.ua/img/tx/228/2283825645.jpg"
                 },
-                new Component()
+                new Component
                 {
                     Name = "AMD Ryzer 5 3600",
                     Type = types.FirstOrDefault(x => x.Name == "Processor"),
@@ -66,8 +65,8 @@ namespace DAL
                 }
             };
 
-            context.Types.AddRange(types);
             context.Producers.AddRange(producers);
+            context.Types.AddRange(types);
             context.Components.AddRange(components);
 
             context.SaveChanges();

@@ -35,7 +35,7 @@ namespace BLL.Services
 
         public async Task CreateComponentAsync(ComponentDTO component)
         {
-            await componentRepository.AddAsync(mapper.Map<Component>(component));
+            await componentRepository.AddAsync(mapper.Map<ComponentDTO, Component>(component));
         }
 
         public async Task DeleteComponentAsync(int id)
@@ -45,13 +45,15 @@ namespace BLL.Services
 
         public IEnumerable<ComponentDTO> GetAllComponents()
         {
-            return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll());
+            return mapper.Map<IEnumerable<Component>, IEnumerable<ComponentDTO>>(componentRepository.GetAll());
         }
 
         public IEnumerable<ComponentDTO> GetAllComponents(List<ComponentFilter> filters)
         {
-            var predicates = new List<Expression<Func<ComponentDTO, bool>>>();
+            if (filters.Count == 1) 
+                return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(filters[0].Predicate.Compile());
 
+            var predicates = new List<Expression<Func<ComponentDTO, bool>>>();
             var groups = filters.GroupBy(x => x.Type);
 
             foreach (var g in groups)
@@ -63,16 +65,15 @@ namespace BLL.Services
                 }
                 predicates.Add(builder);
             }
+
             var builder1 = PredicateBuilder.Create(filters.FirstOrDefault().Predicate);
-            if (predicates.Count > 1)
+
+            foreach (var p in predicates)
             {
-                foreach (var p in predicates)
-                {
-                    builder1 = builder1.And(p);
-                }
+                builder1 = builder1.And(p);
             }
+
             return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(builder1.Compile());
-            //return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll().Where(mapper.Map<Func<Component, bool>>(builder1.Compile())));
         }
 
         public IEnumerable<Producer> GetAllProducers()
@@ -87,7 +88,7 @@ namespace BLL.Services
 
         public ComponentDTO GetComponent(int id)
         {
-            return mapper.Map<ComponentDTO>(componentRepository.Get(id));
+            return mapper.Map<Component, ComponentDTO>(componentRepository.Get(id));
         }
 
         public IEnumerable<string> GetAllTypeNames()
@@ -102,7 +103,7 @@ namespace BLL.Services
 
         public async Task UpdateComponentAsync(ComponentDTO component)
         {
-            await componentRepository.UpdateAsync(mapper.Map<Component>(component));
+            await componentRepository.UpdateAsync(mapper.Map<ComponentDTO, Component>(component));
         }
     }
 }

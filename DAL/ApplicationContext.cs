@@ -1,21 +1,20 @@
+using DAL.Entity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using System.Data.Entity;
+
 namespace DAL
 {
-    using DAL.Entity;
-    using System;
-    using System.ComponentModel;
-    using System.Data.Entity;
-    using System.Linq;
-
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationContext()
             : base("name=AplicationContext")
         {
+            this.Configuration.LazyLoadingEnabled = true;
             Database.SetInitializer(new Initializer());
         }
 
-        public virtual DbSet<Producer> Producers { get; set; }
-        public virtual DbSet<Entity.Component> Components { get; set; }
-        public virtual DbSet<Entity.Type> Types { get; set; }
+        public DbSet<Producer> Producers { get; set; }
+        public DbSet<Component> Components { get; set; }
+        public DbSet<Type> Types { get; set; }
     }
 }

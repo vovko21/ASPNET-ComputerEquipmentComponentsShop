@@ -5,6 +5,13 @@
 
 <div class="dashboard-wrapper">
     <div class="container pt-4">
-        @{ Html.RenderPartial("ComponentsPartial", Model); }
+        <div>
+            <h2>Products</h2>
+            @{ Html.RenderPartial("ComponentsPartial", Model); }
+        </div>
+        <div>
+            <h2>Recently viewed products</h2>
+            @{ Html.RenderPartial("ViewedComponentsPartial"); }
+        </div>
     </div>
 </div>

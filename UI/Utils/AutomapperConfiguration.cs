@@ -5,7 +5,7 @@ using UI.Models;
 
 namespace UI.Utils
 {
-    internal class AutomapperConfiguration : Profile
+    public class AutomapperConfiguration : Profile
     {
         public AutomapperConfiguration()
         {

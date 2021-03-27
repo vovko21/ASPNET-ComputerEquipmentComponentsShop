@@ -14,5 +14,6 @@ namespace UI.Models
         public int Price { get; set; }
         public string Description { get; set; }
         public string Image { get; set; }
+        public bool IsViewed { get; set; }
     }
 }

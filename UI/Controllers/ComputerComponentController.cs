@@ -11,6 +11,8 @@ using System.Web;
 using System.Web.Mvc;
 using UI.Models;
 using UI.Utils;
+using Newtonsoft.Json;
+using System.Web.Script.Serialization;
 
 namespace UI.Controllers
 {
@@ -18,6 +20,7 @@ namespace UI.Controllers
     {
         private readonly IStoreService storeService;
         private readonly IMapper mapper;
+        private List<ComponentViewModel> viewedComponents = new List<ComponentViewModel>();
 
         public ComputerComponentController(IStoreService _componentService, IMapper _mapper)
         {
@@ -29,7 +32,7 @@ namespace UI.Controllers
         [HttpGet]
         public ActionResult Index(string search)
         {
-            var components = mapper.Map<List<ComponentViewModel>>(storeService.GetAllComponents());
+            var components = mapper.Map<IEnumerable<ComponentDTO>, IEnumerable<ComponentViewModel>>(storeService.GetAllComponents());
             if (String.IsNullOrEmpty(search))
             {
                 return View(components.ToList());
@@ -57,7 +60,7 @@ namespace UI.Controllers
                 model.Image = path;
             }
 
-            await storeService.CreateComponentAsync(mapper.Map<ComponentDTO>(model));
+            await storeService.CreateComponentAsync(mapper.Map<ComponentViewModel, ComponentDTO>(model));
             return RedirectToAction("Index");
         }
 
@@ -74,7 +77,7 @@ namespace UI.Controllers
         {
             ViewBag.TypesName = storeService.GetAllTypeNames();
             ViewBag.ProducersName = storeService.GetAllProducerNames();
-            return View(mapper.Map<ComponentViewModel>(storeService.GetComponent(id)));
+            return View(mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id)));
         }
 
         [HttpPost]
@@ -85,14 +88,14 @@ namespace UI.Controllers
                 return View();
             }
 
-            await storeService.UpdateComponentAsync(mapper.Map<ComponentDTO>(model));
+            await storeService.UpdateComponentAsync(mapper.Map<ComponentViewModel, ComponentDTO>(model));
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         public ActionResult Delete(int id)
         {
-            var component = mapper.Map<ComponentViewModel>(storeService.GetComponent(id));
+            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
             if (component == null)
             {
                 return HttpNotFound();
@@ -106,7 +109,7 @@ namespace UI.Controllers
         [HttpPost, ActionName("Delete")]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            if (mapper.Map<ComponentViewModel>(storeService.GetComponent(id)) == null)
+            if (mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id)) == null)
             {
                 return HttpNotFound();
             }
@@ -118,7 +121,7 @@ namespace UI.Controllers
         [HttpGet]
         public ActionResult Show(int id)
         {
-            var component = mapper.Map<ComponentViewModel>(storeService.GetComponent(id));
+            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
             if (component == null)
             {
                 return RedirectToAction("Index");
@@ -126,13 +129,21 @@ namespace UI.Controllers
 
             ViewBag.TypesName = storeService.GetAllTypeNames();
             ViewBag.ProducersName = storeService.GetAllProducerNames();
+            component.IsViewed = true;
+            viewedComponents.Add(component);
+
+            var cookie = new HttpCookie("ViewedProducts");
+            cookie.Value = new JavaScriptSerializer().Serialize(viewedComponents);
+            cookie.Expires = DateTime.Now.AddDays(7);
+            Response.Cookies.Add(cookie);
+
             return View(component);
         }
 
         [HttpPost, ActionName("Show")]
         public ActionResult AddToCart(int id)
         {
-            var component = mapper.Map<ComponentViewModel>(storeService.GetComponent(id));
+            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
             if (component == null)
             {
                 return RedirectToAction("Index");
@@ -185,13 +196,16 @@ namespace UI.Controllers
                 filters.Add(filter);
             }
 
-            if (filters.Count == 0) return HttpNotFound();
+            if (filters.Count == 0) return RedirectToAction("Index");
             Session["ComponentFilter"] = filters;
 
             var components = storeService.GetAllComponents(filters);
             SetViewBag();
-
-            return PartialView("ComponentsPartial", mapper.Map<List<ComponentViewModel>>(components));
+            if (components.Count() != 0)
+            {
+                return PartialView("ComponentsPartial", mapper.Map<IEnumerable<ComponentDTO>, IEnumerable<ComponentViewModel>>(components));
+            }
+            return HttpNotFound();
         }
 
         private void SetViewBag()
