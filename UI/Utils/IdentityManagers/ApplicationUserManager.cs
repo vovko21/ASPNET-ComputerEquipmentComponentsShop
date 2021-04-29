@@ -1,16 +1,12 @@
 ﻿using DAL.Entity;
+using DAL.Entity.Users;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Web;
-using System.Web.Hosting;
 
-namespace UI.Utils
+namespace UI.Utils.IdentityManagers
 {
     public class ApplicationUserManager : UserManager<User>
     {
@@ -30,7 +26,7 @@ namespace UI.Utils
 
             manager.PasswordValidator = new PasswordValidator()
             {
-                RequiredLength = 3,
+                RequiredLength = 6,
                 //RequireDigit = true,
                 //RequireUppercase = true,
                 //RequireNonLetterOrDigit = true

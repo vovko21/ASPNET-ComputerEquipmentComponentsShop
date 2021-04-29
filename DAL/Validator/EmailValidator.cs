@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Validator
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    //[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class EmailValidator : ValidationAttribute
     {
         public override bool IsValid(object value)
@@ -17,7 +17,7 @@ namespace DAL.Validator
             if (value.ToString().Any(c => c == '@' && c == '.') && Regex.Matches(value.ToString(), @"\P{IsCyrillic}").Count == 0)
             {
                 return true;
-            };
+            }
             return false;
         }
     }

@@ -1,17 +1,22 @@
-﻿@model  IEnumerable<UI.Models.ComponentViewModel>
+﻿@model  UI.Models.IndexViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="dashboard-wrapper">
-    <div class="container pt-4">
+    <div id="mainContent" class="container pt-4">
         <div>
             <h2>Products</h2>
-            @{ Html.RenderPartial("ComponentsPartial", Model); }
+            @{ Html.RenderPartial("ComponentsPartial", Model.Component); }
         </div>
         <div>
             <h2>Recently viewed products</h2>
-            @{ Html.RenderPartial("ViewedComponentsPartial"); }
+            @{
+                if (Model.ViewedList != null)
+                {
+                    Html.RenderPartial("ViewedComponentsPartial", Model.ViewedList);
+                }
+            }
         </div>
     </div>
 </div>

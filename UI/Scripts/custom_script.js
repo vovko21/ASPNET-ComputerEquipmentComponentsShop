@@ -9,12 +9,12 @@ function setFilter(item) {
     let value = $(item).val();
 
     console.log(encodeURIComponent(value));
-    window.location.replace(`/ComputerComponent/Filter?type=${type}&value=${encodeURIComponent(value)}`);
+    $("#mainContent").load(`/ComputerComponent/Filter?type=${type}&value=${encodeURIComponent(value)}`);
+    //window.location.replace(`/ComputerComponent/Filter?type=${type}&value=${encodeURIComponent(value)}`);
     //$("#mainContent").load(`/ComputerComponent/Filter?type=${type}&value=${encodeURIComponent(value)}`);
-
 }
 
-//-----------------FORM-------------------------
+//--------------------FORM-------------------------
 let field = document.getElementById("game-img-text");
 let url = document.getElementById("game-img-url");
 

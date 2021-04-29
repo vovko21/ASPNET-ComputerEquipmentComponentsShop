@@ -1,18 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DAL.Entity
+namespace DAL.Entity.StoreProducts
 {
-    public class Component
+    public class ComponentDB
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         [MaxLength(50)]
         public string Name { get; set; }
         [Required]
-        public virtual Type Type { get; set; }
+        public virtual TypeDB Type { get; set; }
         [Required]
-        public virtual Producer Producer { get; set; }
+        public virtual ProducerDB Producer { get; set; }
         [Required]
         public int Price { get; set; }
         public string Description { get; set; }

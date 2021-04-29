@@ -3,28 +3,29 @@ using Binbin.Linq;
 using BLL.Models;
 using BLL.Services.Interface;
 using BLL.Utils;
+using DAL.Entity.StoreProducts;
 using DAL.Repository.Interface;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Component = DAL.Entity.Component;
-using Producer = DAL.Entity.Producer;
-using Type = DAL.Entity.Type;
+using ComponentDB = DAL.Entity.StoreProducts.ComponentDB;
+using TypeDB = DAL.Entity.StoreProducts.TypeDB;
 
 namespace BLL.Services
 {
     public class StoreService : IStoreService
     {
-        private IGenericRepository<Component> componentRepository;
-        private IGenericRepository<Type> typeRepository;
-        private IGenericRepository<Producer> producerRepository;
+        private IGenericRepository<ComponentDB> componentRepository;
+        private IGenericRepository<TypeDB> typeRepository;
+        private IGenericRepository<ProducerDB> producerRepository;
         private readonly IMapper mapper;
 
-        public StoreService(IGenericRepository<Component> _componentRepository,
-             IGenericRepository<Type> _typeRepository,
-             IGenericRepository<Producer> _producerRepository,
+        public StoreService(IGenericRepository<ComponentDB> _componentRepository,
+             IGenericRepository<TypeDB> _typeRepository,
+             IGenericRepository<ProducerDB> _producerRepository,
              IMapper _mapper)
         {
             componentRepository = _componentRepository;
@@ -35,7 +36,7 @@ namespace BLL.Services
 
         public async Task CreateComponentAsync(ComponentDTO component)
         {
-            await componentRepository.AddAsync(mapper.Map<ComponentDTO, Component>(component));
+            await componentRepository.AddAsync(mapper.Map<ComponentDTO, ComponentDB>(component));
         }
 
         public async Task DeleteComponentAsync(int id)
@@ -45,15 +46,15 @@ namespace BLL.Services
 
         public IEnumerable<ComponentDTO> GetAllComponents()
         {
-            return mapper.Map<IEnumerable<Component>, IEnumerable<ComponentDTO>>(componentRepository.GetAll());
+            return mapper.Map<IEnumerable<ComponentDB>, IEnumerable<ComponentDTO>>(componentRepository.GetAll());
         }
 
         public IEnumerable<ComponentDTO> GetAllComponents(List<ComponentFilter> filters)
         {
-            if (filters.Count == 1) 
+            if (filters.Count == 1)
                 return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(filters[0].Predicate.Compile());
 
-            var predicates = new List<Expression<Func<ComponentDTO, bool>>>();
+            var predicateGroups = new List<Expression<Func<ComponentDTO, bool>>>();
             var groups = filters.GroupBy(x => x.Type);
 
             foreach (var g in groups)
@@ -63,32 +64,35 @@ namespace BLL.Services
                 {
                     builder = builder.Or(g.ToArray()[i].Predicate);
                 }
-                predicates.Add(builder);
+                predicateGroups.Add(builder);
+            }
+
+            if (predicateGroups.Count == 1)
+            {
+                return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(predicateGroups.FirstOrDefault().Compile());
             }
 
             var builder1 = PredicateBuilder.Create(filters.FirstOrDefault().Predicate);
-
-            foreach (var p in predicates)
+            foreach (var p in predicateGroups)
             {
                 builder1 = builder1.And(p);
             }
-
             return mapper.Map<IEnumerable<ComponentDTO>>(componentRepository.GetAll()).Where(builder1.Compile());
         }
 
-        public IEnumerable<Producer> GetAllProducers()
+        public IEnumerable<ProducerDB> GetAllProducers()
         {
             return producerRepository.GetAll();
         }
 
-        public IEnumerable<Type> GetAllTypes()
+        public IEnumerable<TypeDB> GetAllTypes()
         {
             return typeRepository.GetAll();
         }
 
         public ComponentDTO GetComponent(int id)
         {
-            return mapper.Map<Component, ComponentDTO>(componentRepository.Get(id));
+            return mapper.Map<ComponentDB, ComponentDTO>(componentRepository.Get(id));
         }
 
         public IEnumerable<string> GetAllTypeNames()
@@ -103,7 +107,16 @@ namespace BLL.Services
 
         public async Task UpdateComponentAsync(ComponentDTO component)
         {
-            await componentRepository.UpdateAsync(mapper.Map<ComponentDTO, Component>(component));
+            await componentRepository.UpdateAsync(mapper.Map<ComponentDTO, ComponentDB>(component));
+        }
+
+        public void Detach(ComponentDTO entity)
+        {
+            componentRepository.Detach(mapper.Map<ComponentDTO, ComponentDB>(entity));
+        }
+        public void Attach(ComponentDTO entity)
+        {
+            componentRepository.Detach(mapper.Map<ComponentDTO, ComponentDB>(entity));
         }
     }
 }

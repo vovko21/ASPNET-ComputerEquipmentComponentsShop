@@ -1,0 +1,53 @@
+﻿@model UI.Models.OrderViewModel
+@{
+    Layout = "~/Views/Shared/_OrderLayout.cshtml";
+}
+<div>
+    @using (Html.BeginForm("Create", "Order", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <h4>Order</h4>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                @Html.LabelFor(model => model.Adress, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Adress, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Adress, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <ul class="orderlist h-100">
+            @foreach (var position in Model.OrderItems)
+            {
+                <li class="row g-0">
+                    <div class="col-4">
+                        <img class="img-fluid p-2" src="@position.Component.Image" alt="Card image cap" style="height: 100px;">
+                    </div>
+                    <div class="col-8 d-flex flex-column">
+                        <div class="card-body">
+                            <h4 class="card-title fs-order-list"><b>@position.Component.Name</b></h4>
+                            <p class="card-text fs-order-list">Price: @position.Component.Price $</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="card-text fs-order-list">Quantity: @position.Quantity</p>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create Order" class="btn btn-default" />
+            </div>
+        </div>
+    }
+</div>
+<hr>
+<p>
+    @Html.ActionLink("Cancel", "Index", "ComputerComponent")
+</p>

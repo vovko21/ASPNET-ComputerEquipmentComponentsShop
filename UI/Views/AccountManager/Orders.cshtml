@@ -1,0 +1,30 @@
+﻿@model List<UI.Models.OrderViewModel>
+@{
+    Layout = "~/Views/Shared/_AccountManagerLayout.cshtml";
+}
+<div class="dashboard-wrapper">
+    <div class="container pt-4">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <div>
+                <hr />
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.ActionLink($"See Details About Order #{Model[i].Id}", "OrderDetails", new { id = Model[i].Id })
+                    </dt>
+                </dl>
+            </div>
+            if (User.IsInRole("Admin"))
+            {
+                <div>
+                    @Html.ActionLink("Edit", "EditOrder", new { id = Model[i].Id })
+                    @Html.ActionLink("Delete", "DeleteOrder", new { id = Model[i].Id })
+                </div>
+            }
+        }
+        <hr>
+        <p>
+            @Html.ActionLink("Back to List", "Index")
+        </p>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 ﻿using DAL.Repository.Interface;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -49,6 +50,20 @@ namespace DAL.Repository
             }
 
             return _set.AsEnumerable();
+        }
+        public bool Exists(TEntity entity)
+        {
+            return _set.Local.Any(e => e == entity);
+        }
+
+        public void Detach(TEntity entity)
+        {
+            ((IObjectContextAdapter)_dbContext).ObjectContext.ObjectStateManager.ChangeObjectState(entity, EntityState.Detached);
+        }
+
+        public void Attach(TEntity entity)
+        {
+            _set.Attach(entity);
         }
 
         public async Task UpdateAsync(TEntity entity)

@@ -1,0 +1,181 @@
+﻿@model UI.Models.OrderViewModel
+
+@{
+    Layout = "~/Views/Shared/_AccountManagerLayout.cshtml";
+    List<string> options = new List<string>();
+    options.Add("None");
+    options.Add("PendingPayment");
+    options.Add("Failed");
+    options.Add("OnHold");
+    options.Add("Processing");
+    options.Add("Completed");
+    options.Add("Canceled");
+    options.Add("Refunded");
+    //None,
+    //PendingPayment, // (>> Failed or >> OnHold)
+    //Failed,
+    //OnHold, //Awaiting payment (>> Processing)
+    //Processing, // Processing product (>> Completed or >> Canceled)
+    //Completed,
+    //Canceled,
+    //Refunded
+    var orderStatusList = new SelectList(options);
+}
+
+<div class="dashboard-wrapper">
+    <div class="container pt-4">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                <h4>OrderViewModel</h4>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.Id)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.OrderCreated, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.OrderCreated, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.OrderCreated, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.OrderClosed, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.OrderClosed, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.OrderClosed, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Adress, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Adress, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Adress, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ClientId, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ClientId, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.ClientId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.OrderStatus, new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.OrderStatus, orderStatusList, "Please select", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.OrderStatus)
+                    </div>
+                </div>
+
+                @*<ul class="orderlist h-100">
+                        @for (int i = 0; i < Model.OrderItems.Count; i++)
+                        {
+                            <li class="row g-0">
+                                <div>
+                                    <div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10">
+                                                @Html.EditorFor(model => model.OrderItems[i].Component.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                                @Html.ValidationMessageFor(model => model.OrderItems[i].Component.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Type, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="ml-5 d-inline-block">
+                                                @Html.DropDownList("Type", new SelectList(ViewBag.TypesName))
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Producer, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="ml-5 d-inline-block">
+                                                @Html.DropDownList("Producer", new SelectList(ViewBag.ProducersName))
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10">
+                                                @Html.EditorFor(model => model.OrderItems[i].Component.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                                @Html.ValidationMessageFor(model => model.OrderItems[i].Component.Description, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10">
+                                                @Html.EditorFor(model => model.OrderItems[i].Component.Price, new { htmlAttributes = new { @class = "form-control" } })
+                                                @Html.ValidationMessageFor(model => model.OrderItems[i].Component.Price, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="d-flex">
+                                            <div class="form-group">
+                                                <div class="col-md-10">
+                                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                                        <input class="form-check-input d-inlineblock" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option" onchange="DisplayImageText(this)">
+                                                        <label class="form-check-label" for="inlineRadio1">URL</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-10">
+                                                    <div class="form-check form-check-inline d-flex align-items-center">
+                                                        <input class="form-check-input d-inlineblock" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option1" onchange="DisplayImageURL(this)">
+                                                        <label class="form-check-label" for="inlineRadio2">LocalPC</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10 d-none" id="game-img-url">
+                                                <label for="uploadFile">Choose file to upload</label>
+                                                <input id="image_attach" type="file" name="uploadFile">
+                                            </div>
+                                        </div>
+                                        <div class="form-group d-none" id="game-img-text">
+                                            @Html.LabelFor(model => model.OrderItems[i].Component.Image, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10">
+                                                @Html.EditorFor(model => model.OrderItems[i].Component.Image, new { htmlAttributes = new { @class = "form-control" } })
+                                                @Html.ValidationMessageFor(model => model.OrderItems[i].Component.Image, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-offset-2 col-md-10">
+                                                <input type="submit" value="Edit" class="btn btn-default" style="border: 1px solid black;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @Html.LabelFor(model => model.OrderItems[i].Quantity, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.EditorFor(model => model.OrderItems[i].Quantity, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.OrderItems[i].Quantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <hr />
+                        }
+                    </ul>*@
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Save" class="btn btn-default" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div>
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    </div>
+</div>

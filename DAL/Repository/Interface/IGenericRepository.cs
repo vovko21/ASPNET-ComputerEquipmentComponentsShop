@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DAL.Repository.Interface
@@ -13,5 +10,8 @@ namespace DAL.Repository.Interface
         Task DeleteAsync(int id);
         IEnumerable<TEntity> GetAll();
         TEntity Get(int id);
+        bool Exists(TEntity entity);
+        void Detach(TEntity entity);
+        void Attach(TEntity entity);
     }
 }

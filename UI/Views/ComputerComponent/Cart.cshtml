@@ -1,4 +1,4 @@
-﻿@model List<UI.Models.ComponentViewModel>
+﻿@model List<UI.Models.OrderItemViewModel>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "Cart";
@@ -6,27 +6,44 @@
 }
 <div class="dashboard-wrapper">
     <div class="container pt-4">
-        @foreach (var item in Model)
+        @using (Html.BeginForm("OrderForm", "Order", FormMethod.Post))
         {
-            <div class="row g-0">
-                <div class="col-4">
-                    <img class="img-fluid p-2" src="@item.Image" alt="Card image cap">
-                </div>
-                <div class="col-8 d-flex flex-column">
-                    <div class="card-body">
-                        <h3 class="card-title">@item.Name</h3>
-                        <p class="card-text">@item.Description</p>
-                        <p class="card-text">Producer: <strong>@item.Producer</strong></p>
-                        <p class="card-text">Type: <strong>@item.Type</strong></p>
-                        <strong><p class="card-text">Price: @item.Price $</p></strong>
-                        @{fullPrice += item.Price;}
+            for (int i = 0; i < Model.Count; i++)
+            {
+                <div class="row g-0">
+                    <div class="col-4">
+                        <img class="img-fluid p-2" src="@Model[i].Component.Image" alt="Card image cap">
                     </div>
+                    <div class="col-8 d-flex flex-column">
+                        <div class="card-body">
+                            <h3 class="card-title">@Model[i].Component.Name</h3>
+                            <p class="card-text">@Model[i].Component.Description</p>
+                            <p class="card-text">Producer: <strong>@Model[i].Component.Producer</strong></p>
+                            <p class="card-text">Type: <strong>@Model[i].Component.Type</strong></p>
+                            <p class="card-text">Price: @Model[i].Component.Price $</p>
+                            @{fullPrice += Model[i].Component.Price;}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model[i].Quantity, htmlAttributes: new { @class = "control-label col-md-2"})
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model[i].Quantity, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model[i].Quantity, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <hr />
+            <div class="row">
+                <div class="col-6">
+                    <div style="font-size: 20px"> Price: @fullPrice</div>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-success">Order</button>
                 </div>
             </div>
         }
-        <hr />
-        <div>
-            <div style="font-size: 20px"> Price: @fullPrice</div>
-        </div>
     </div>
 </div>

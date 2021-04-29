@@ -13,6 +13,6 @@ namespace UI.Models
         [Required]
         [MinLength(6)]
         public string Password { get; set; }
-        public bool RememberMe { get; set; }
+        public string RememberMe { get; set; }
     }
 }

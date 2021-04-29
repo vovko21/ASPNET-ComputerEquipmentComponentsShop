@@ -1,0 +1,13 @@
+﻿@model  IEnumerable<UI.Models.ComponentViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="dashboard-wrapper">
+    <div class="container pt-4">
+        <div>
+            <h2>Products</h2>
+            @{ Html.RenderPartial("ComponentsPartial", Model); }
+        </div>
+    </div>
+</div>

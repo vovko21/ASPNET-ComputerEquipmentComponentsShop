@@ -1,0 +1,58 @@
+﻿@model UI.Models.OrderViewModel
+
+@{
+    Layout = "~/Views/Shared/_AccountManagerLayout.cshtml";
+}
+<div class="dashboard-wrapper">
+    <div class="container pt-4">
+        <div>
+            <h4>OrderViewModel</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.OrderCreated)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.OrderCreated)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.OrderClosed)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.OrderClosed)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Adress)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Adress)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ClientId)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ClientId)
+                </dd>
+
+                <dt>
+                    Order Status
+                </dt>
+
+                <dd>
+                    <div>@Model.OrderStatus</div>
+                </dd>
+
+            </dl>
+            <p>
+                @Html.ActionLink("Back to List", "Index")
+            </p>
+        </div>
+    </div>
+</div>

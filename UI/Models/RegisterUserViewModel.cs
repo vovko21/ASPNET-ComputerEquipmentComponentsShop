@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -11,15 +12,17 @@ namespace UI.Models
     {
         [Required]
         public string Username { get; set; }
+        [Column("Email")]
         [Required]
-        [EmailValidator(ErrorMessage = "Not valid email!")]
-        public string Email { get; set; }
+        [EmailAddress(ErrorMessage = "Enter a proper email address")]
+        [StringLength(25, ErrorMessage = "Maximum length allowed for an email is 30 characters")]
+        public string EmailViewModel { get; set; }
         [Required]
         [MinLength(6)]
         public string Password { get; set; }
         [Required]
         [MinLength(6)]
-        [Compare("Password", ErrorMessage = "Muust be equal")]
+        [Compare("Password", ErrorMessage = "Passwords must be equal")]
         public string ConfirmPassword { get; set; }
     }
 }

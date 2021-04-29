@@ -16,7 +16,7 @@
                 <h2>Delete</h2>
 
                 <div>
-                    @using (Html.BeginForm("Delete", "ComputerComponent", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    @using (Html.BeginForm("Delete", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
                         <div class="form-group">
                             @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2", @readonly = "readonly" })

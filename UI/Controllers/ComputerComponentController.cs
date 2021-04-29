@@ -4,138 +4,75 @@ using BLL.Services.Interface;
 using BLL.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 using UI.Models;
 using UI.Utils;
-using Newtonsoft.Json;
-using System.Web.Script.Serialization;
 
 namespace UI.Controllers
 {
     public class ComputerComponentController : Controller
     {
-        private readonly IStoreService storeService;
-        private readonly IMapper mapper;
-        private List<ComponentViewModel> viewedComponents = new List<ComponentViewModel>();
+        private readonly IStoreService _storeService;
+        private readonly IMapper _mapper;
+        private const string CART = "cart";
+        private const string VIEWED_PRODUCTS = "ViewedProducts";
 
         public ComputerComponentController(IStoreService _componentService, IMapper _mapper)
         {
-            storeService = _componentService;
-            mapper = _mapper;
+            _storeService = _componentService;
+            this._mapper = _mapper;
             SetViewBag();
         }
 
         [HttpGet]
         public ActionResult Index(string search)
         {
-            var components = mapper.Map<IEnumerable<ComponentDTO>, IEnumerable<ComponentViewModel>>(storeService.GetAllComponents());
+            var components = _mapper.Map<IEnumerable<ComponentDTO>, IEnumerable<ComponentViewModel>>(_storeService.GetAllComponents());
             if (String.IsNullOrEmpty(search))
             {
-                return View(components.ToList());
+                var viewedProducts = GetSessionList<ViewedList>(VIEWED_PRODUCTS);
+                if (viewedProducts == null)
+                {
+                    return View(new IndexViewModel() { Component = components.ToList() });
+                }
+                else
+                {
+                    return View(new IndexViewModel() { Component = components.ToList(), ViewedList = viewedProducts });
+                }
             }
 
             SetViewBag();
-            return View(components.Where(x => x.Name.Contains(search)).ToList());
-        }
 
-        [HttpPost]
-        public async Task<ActionResult> Create(ComponentViewModel model, HttpPostedFileBase uploadFile)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
-            if (uploadFile != null)
-            {
-                var guid = Guid.NewGuid().ToString();
-                var fileName = guid + Path.GetExtension(uploadFile.FileName).ToLower();
-                var path = Path.Combine(Server.MapPath("/Images/") + fileName);
-
-                uploadFile.SaveAs(path);
-                model.Image = path;
-            }
-
-            await storeService.CreateComponentAsync(mapper.Map<ComponentViewModel, ComponentDTO>(model));
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public ActionResult Create()
-        {
-            ViewBag.TypesName = storeService.GetAllTypeNames();
-            ViewBag.ProducersName = storeService.GetAllProducerNames();
-            return View();
-        }
-
-        [HttpGet]
-        public ActionResult Edit(int id)
-        {
-            ViewBag.TypesName = storeService.GetAllTypeNames();
-            ViewBag.ProducersName = storeService.GetAllProducerNames();
-            return View(mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id)));
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Edit(ComponentViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
-            await storeService.UpdateComponentAsync(mapper.Map<ComponentViewModel, ComponentDTO>(model));
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public ActionResult Delete(int id)
-        {
-            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
-            if (component == null)
-            {
-                return HttpNotFound();
-            }
-
-            ViewBag.TypesName = storeService.GetAllTypeNames();
-            ViewBag.ProducersName = storeService.GetAllProducerNames();
-            return View(component);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<ActionResult> DeleteConfirmed(int id)
-        {
-            if (mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id)) == null)
-            {
-                return HttpNotFound();
-            }
-
-            await storeService.DeleteComponentAsync(id);
-            return RedirectToAction("Index");
+            return View(new IndexViewModel() { Component = components.Where(x => x.Name.Contains(search)).ToList() });
         }
 
         [HttpGet]
         public ActionResult Show(int id)
         {
-            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
+            var component = _mapper.Map<ComponentDTO, ComponentViewModel>(_storeService.GetComponent(id));
             if (component == null)
             {
                 return RedirectToAction("Index");
             }
 
-            ViewBag.TypesName = storeService.GetAllTypeNames();
-            ViewBag.ProducersName = storeService.GetAllProducerNames();
-            component.IsViewed = true;
-            viewedComponents.Add(component);
+            var list = GetSessionList<ViewedList>(VIEWED_PRODUCTS);
+            if (list == null)
+            {
+                var newList = new ViewedList();
+                newList.Append(component);
+                SaveToSession(newList, VIEWED_PRODUCTS);
+            }
+            else
+            {
+                list.Append(component);
+                SaveToSession(list, VIEWED_PRODUCTS);
+            }
 
-            var cookie = new HttpCookie("ViewedProducts");
-            cookie.Value = new JavaScriptSerializer().Serialize(viewedComponents);
-            cookie.Expires = DateTime.Now.AddDays(7);
-            Response.Cookies.Add(cookie);
+            ViewBag.TypesName = _storeService.GetAllTypeNames();
+            ViewBag.ProducersName = _storeService.GetAllProducerNames();
 
             return View(component);
         }
@@ -143,24 +80,82 @@ namespace UI.Controllers
         [HttpPost, ActionName("Show")]
         public ActionResult AddToCart(int id)
         {
-            var component = mapper.Map<ComponentDTO, ComponentViewModel>(storeService.GetComponent(id));
+            var component = _mapper.Map<ComponentDTO, ComponentViewModel>(_storeService.GetComponent(id));
+
             if (component == null)
             {
                 return RedirectToAction("Index");
             }
 
-            CartItems.AddItem(component);
+            WriteCookie(component);
+
             return RedirectToAction("Index");
         }
 
         [HttpGet]
         public ActionResult Cart()
         {
-            if (CartItems.Items.Count > 0)
+            var list = ReadCookie(CART);
+
+            if (list != null)
             {
-                return View(CartItems.Items);
+                var orderItems = new List<OrderItemViewModel>();
+                foreach (var item in list)
+                {
+                    orderItems.Add(new OrderItemViewModel() { Component = _mapper.Map<ComponentDTO, ComponentViewModel>(_storeService.GetComponent(item.ComponentId)), Quantity = item.Quantity });
+                }
+                return View(orderItems);
             }
+
             return RedirectToAction("Index");
+        }
+
+        private void WriteCookie(ComponentViewModel component)
+        {
+            List<CookieCartObject> listToSave;
+
+            var cookieObject = new CookieCartObject { ComponentId = component.Id, Quantity = 1 };
+
+            var oldCookies = ReadCookie(CART);
+
+            if (oldCookies == null)
+            {
+                List<CookieCartObject> list = new List<CookieCartObject>();
+                list.Add(cookieObject);
+                listToSave = list;
+            }
+            else
+            {
+                var cartComponent = _mapper.Map<ComponentDTO, ComponentViewModel>(_storeService.GetComponent(component.Id));
+                var thisComponent = oldCookies.Find(x => x.ComponentId == cartComponent.Id);
+
+                if (thisComponent == null)
+                {
+                    oldCookies.Add(cookieObject);
+                }
+                else
+                {
+                    oldCookies.Remove(thisComponent);
+                    thisComponent.Quantity++;
+                    oldCookies.Add(thisComponent);
+                }
+                listToSave = oldCookies;
+            }
+
+            HttpCookie httpCookie = new HttpCookie(CART);
+
+            httpCookie.Value = new JavaScriptSerializer().Serialize(listToSave);
+            httpCookie.Expires = DateTime.Now.AddDays(30d);
+            HttpContext.Response.Cookies.Add(httpCookie);
+        }
+
+        private List<CookieCartObject> ReadCookie(string key)
+        {
+            if (Request.Cookies[key] != null && Request.Cookies[key].Value != string.Empty)
+            {
+                return new JavaScriptSerializer().Deserialize<List<CookieCartObject>>(Request.Cookies[key].Value);
+            }
+            return null;
         }
 
         public ActionResult Filter(string type, string value)
@@ -196,22 +191,46 @@ namespace UI.Controllers
                 filters.Add(filter);
             }
 
-            if (filters.Count == 0) return RedirectToAction("Index");
             Session["ComponentFilter"] = filters;
+            // BUG to fix [start] -> 
+            if (filters.Count == 0) return RedirectToAction("Index");
+            // <- [end]
+            List<ComponentViewModel> components = _mapper.Map<List<ComponentDTO>, List<ComponentViewModel>>(_storeService.GetAllComponents(filters).ToList());
 
-            var components = storeService.GetAllComponents(filters);
             SetViewBag();
-            if (components.Count() != 0)
+
+            if (components.Count != 0)
             {
-                return PartialView("ComponentsPartial", mapper.Map<IEnumerable<ComponentDTO>, IEnumerable<ComponentViewModel>>(components));
+                return PartialView("ComponentsPartial", components);
             }
+
             return HttpNotFound();
+        }
+
+        private void SaveToSession<T>(T list, string name)
+        {
+            Session[name] = list;
+        }
+
+        private T GetSessionList<T>(string name)
+        {
+            if (Session[name] == null)
+            {
+                return default(T);
+            }
+
+            if (Session[name] is T)
+            {
+                return (T)Session[name];
+            }
+
+            return default(T);
         }
 
         private void SetViewBag()
         {
-            ViewBag.Types = storeService.GetAllProducerNames();
-            ViewBag.Producers = storeService.GetAllTypeNames();
+            ViewBag.Types = _storeService.GetAllTypeNames();
+            ViewBag.Producers = _storeService.GetAllProducerNames();
         }
     }
 }

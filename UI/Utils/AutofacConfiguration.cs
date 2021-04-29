@@ -22,6 +22,7 @@ namespace UI.Utils
             builder.RegisterType<ApplicationContext>().As<DbContext>();
             builder.RegisterGeneric(typeof(GenericRepository<>)).As(typeof(IGenericRepository<>));
             builder.RegisterType<StoreService>().As<IStoreService>();
+            builder.RegisterType<OrderService>().As<IOrderService>();
 
             var configurationManager = new MapperConfiguration(cfg => cfg.AddProfile(new AutomapperConfiguration()));
             builder.RegisterInstance(configurationManager.CreateMapper());

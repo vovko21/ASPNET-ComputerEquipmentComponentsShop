@@ -12,3 +12,23 @@
 .max-image-400 {
     max-width: 400px;
 }
+
+.h-100 {
+    height: 300px !important;
+}
+
+.h-200 {
+    height: 180px !important;
+}
+
+.h-400 {
+    height: 400px !important;
+}
+
+.orderlist {
+    overflow-y: scroll;
+}
+
+.fs-order-list {
+    font-size: 14px !important;
+}
